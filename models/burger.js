@@ -1,7 +1,7 @@
 module.exports = function(sequelize, DataTypes) {
     var Burger = sequelize.define('Burger', {
         id: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTERGER,
             allowNull: false,
             validate: {
                 len: [1]
