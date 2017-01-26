@@ -1,17 +1,17 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
-var orm = require('./config/orm.js');
-
-var port = 3000;
+var port = process.env.port || 3000;
 
 var app = express();
 
-// ORM data selection
+var db = require('./models');
 
-// Static content from app to the 'public' folder
-app.use(express.static(process.cwd() + '/public'));
-app.use(bodyParser.urlencoded({extended: false}));
+// Sets up the Express app to handle data parsing
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.text());
+app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 
 // Override DELETE Post
 app.use(methodOverride('_method'));
@@ -22,8 +22,15 @@ var exphbs = require('express-handlebars');
 app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
-// Routes for server access
-var routes = require('./controllers/burgers_controller.js');
-app.use('/', routes);
 
-app.listen(port);
+// Static Directory
+app.use(express.static(process.cwd() + '/public'));
+
+// Routes for server access
+require('./routes/burger-api-routes')(app);
+
+db.sequelize.sync().then(function() {
+    app.listen(port, function() {
+        console.log("OMG ITS WORKING ON " + PORT + " now DONT TOUCH IT!");
+    });
+});
